@@ -11,13 +11,48 @@ export default function AcceptInvitePage({ onProfileCreated }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Supabase puts access_token in the URL hash after invite click
-    const hash = window.location.hash;
-    if (hash.includes("type=invite") || hash.includes("access_token")) {
-      setTokenReady(true);
-    } else {
+    let cancelled = false;
+
+    async function prepareInviteSession() {
+      const hash = window.location.hash;
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+
+      if (hash.includes("type=invite") || hash.includes("access_token")) {
+        setTokenReady(true);
+        return;
+      }
+
+      if (code) {
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+        if (cancelled) return;
+
+        if (exchangeError) {
+          setError(exchangeError.message || "Invalid or expired invite link.");
+          return;
+        }
+
+        window.history.replaceState(null, "", "/accept-invite");
+        setTokenReady(true);
+        return;
+      }
+
+      const { data } = await supabase.auth.getSession();
+      if (cancelled) return;
+
+      if (data.session) {
+        setTokenReady(true);
+        return;
+      }
+
       setError("Invalid or expired invite link.");
     }
+
+    prepareInviteSession();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function handleSubmit(e) {

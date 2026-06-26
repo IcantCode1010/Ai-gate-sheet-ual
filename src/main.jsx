@@ -7,6 +7,22 @@ import AcceptInvitePage from "./components/AcceptInvitePage.jsx";
 import { useAuth } from "./hooks/useAuth.js";
 
 function Root() {
+  const isInviteCallback =
+    window.location.pathname !== "/accept-invite" &&
+    (
+      window.location.hash.includes("access_token") ||
+      window.location.hash.includes("type=invite") ||
+      window.location.search.includes("code=")
+    );
+
+  if (isInviteCallback) {
+    window.history.replaceState(
+      null,
+      "",
+      `/accept-invite${window.location.search}${window.location.hash}`,
+    );
+  }
+
   const { session, profile, loading, login, logout } = useAuth();
 
   if (loading) {
