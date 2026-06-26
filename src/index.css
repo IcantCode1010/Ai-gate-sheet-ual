@@ -693,6 +693,329 @@ body {
   justify-content: flex-end;
 }
 
+/* ─── App Body (sheet + side panels) ─── */
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.app-body .scroll-area {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ─── Top Bar extras ─── */
+.top-bar-divider {
+  width: 1px;
+  height: 20px;
+  background: #3a4a6a;
+  margin: 0 4px;
+}
+
+.top-bar-user {
+  font-size: 11px;
+  color: #aac4ff;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sync-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+
+.btn-active {
+  background: rgba(170, 196, 255, 0.15) !important;
+  border-color: #aac4ff88 !important;
+}
+
+/* ─── Login Page ─── */
+.login-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0f111a;
+}
+
+.login-box {
+  background: #1a1c24;
+  border: 1px solid #2a2d3e;
+  border-radius: 10px;
+  padding: 36px 40px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+.login-logo {
+  font-size: 22px;
+  font-weight: bold;
+  color: var(--chat-accent);
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.login-subtitle {
+  font-size: 11px;
+  color: #666;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.login-label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #aaa;
+  letter-spacing: 0.4px;
+}
+
+.login-input {
+  padding: 9px 12px;
+  background: #22242e;
+  border: 1px solid #3a3d4e;
+  border-radius: 5px;
+  color: #e0e0e0;
+  font-size: 13px;
+  outline: none;
+}
+.login-input:focus { border-color: var(--chat-accent); }
+
+.login-btn {
+  padding: 10px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.login-btn:disabled { opacity: 0.5; cursor: default; }
+.login-btn:hover:not(:disabled) { opacity: 0.9; }
+
+.login-error {
+  background: #2a1010;
+  color: #ff6b6b;
+  border: 1px solid #cc222244;
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.login-note {
+  margin-top: 18px;
+  font-size: 11px;
+  color: #555;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* ─── Status Board Panel ─── */
+.status-board {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-left: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.status-board-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--shift-bg);
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.status-board-title {
+  font-weight: bold;
+  font-size: 12px;
+  color: var(--accent);
+}
+
+.status-board-count {
+  font-size: 10px;
+  color: var(--text);
+  opacity: 0.6;
+}
+
+.status-board-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.status-empty {
+  font-size: 11px;
+  color: var(--text);
+  opacity: 0.5;
+  text-align: center;
+  padding: 16px 0;
+  font-style: italic;
+}
+
+.status-card {
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.status-card-me {
+  border-color: var(--accent);
+  border-width: 1.5px;
+}
+
+.status-card-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.status-name {
+  font-weight: bold;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.status-you-badge {
+  font-size: 9px;
+  background: var(--accent);
+  color: #fff;
+  padding: 1px 5px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.status-online-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #2a7a2a;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.status-card-body {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.status-stat-val {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--accent);
+}
+
+.status-stat-label {
+  font-size: 9px;
+  color: var(--text);
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.status-date {
+  font-size: 10px;
+  color: var(--text);
+  opacity: 0.5;
+  margin-top: 5px;
+}
+
+/* ─── Shift History Panel ─── */
+.history-panel {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-left: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.history-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.history-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-light);
+  gap: 6px;
+}
+.history-row:hover { background: var(--accent-light); }
+
+.history-row-left {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.history-date {
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--text);
+}
+
+.history-own-badge {
+  font-size: 9px;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  color: var(--text);
+  padding: 1px 5px;
+  border-radius: 8px;
+  opacity: 0.7;
+}
+
+.history-row-right { flex-shrink: 0; }
+
+.history-meta {
+  font-size: 11px;
+  color: var(--text);
+  opacity: 0.6;
+}
+
 /* ─── Print Styles ─── */
 @media print {
   .no-print { display: none !important; }

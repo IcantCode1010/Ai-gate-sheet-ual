@@ -1,10 +1,19 @@
 import { useState } from "react";
 
-export default function TopBar({ onSave, onExportCSV, onNewSheet, onEndShift, dark, onToggleDark }) {
+const SYNC_COLORS = { synced: "#2a7a2a", syncing: "#a07000", offline: "#cc2222" };
+const SYNC_LABELS = { synced: "Saved", syncing: "Saving…", offline: "Offline" };
+
+export default function TopBar({
+  onSave, onExportCSV, onNewSheet, onEndShift, dark, onToggleDark,
+  displayName, onLogout, onInvite,
+  showStatusBoard, onToggleStatusBoard,
+  showHistory, onToggleHistory,
+  syncStatus = "synced",
+}) {
   const [savedFlash, setSavedFlash] = useState(false);
 
   function handleSave() {
-    onSave();
+    onSave?.();
     setSavedFlash(true);
     setTimeout(() => setSavedFlash(false), 1800);
   }
@@ -17,21 +26,45 @@ export default function TopBar({ onSave, onExportCSV, onNewSheet, onEndShift, da
       </div>
 
       <div className="top-bar-actions">
+        <span
+          className="sync-dot"
+          title={SYNC_LABELS[syncStatus]}
+          style={{ background: SYNC_COLORS[syncStatus] }}
+        />
+
         <button className="btn btn-save" onClick={handleSave}>
           {savedFlash ? "✓ Saved" : "Save"}
         </button>
-        <button className="btn btn-secondary" onClick={onExportCSV}>
-          CSV
+        <button className="btn btn-secondary" onClick={onExportCSV}>CSV</button>
+        <button className="btn btn-secondary" onClick={() => window.print()}>Print / PDF</button>
+        <button className="btn btn-ghost" onClick={onNewSheet}>New Sheet</button>
+        <button className="btn btn-end-shift" onClick={onEndShift}>End Shift</button>
+
+        <div className="top-bar-divider" />
+
+        <button
+          className={`btn btn-ghost${showStatusBoard ? " btn-active" : ""}`}
+          onClick={onToggleStatusBoard}
+          title="Live status board"
+        >
+          Status
         </button>
-        <button className="btn btn-secondary" onClick={() => window.print()}>
-          Print / PDF
+        <button
+          className={`btn btn-ghost${showHistory ? " btn-active" : ""}`}
+          onClick={onToggleHistory}
+          title="Shift history"
+        >
+          History
         </button>
-        <button className="btn btn-ghost" onClick={onNewSheet}>
-          New Sheet
+        <button className="btn btn-ghost" onClick={onInvite} title="Invite team member">
+          + Invite
         </button>
-        <button className="btn btn-end-shift" onClick={onEndShift}>
-          End Shift
-        </button>
+
+        <div className="top-bar-divider" />
+
+        {displayName && (
+          <span className="top-bar-user" title="Logged in as">{displayName}</span>
+        )}
         <button
           className="btn btn-icon"
           onClick={onToggleDark}
@@ -39,6 +72,11 @@ export default function TopBar({ onSave, onExportCSV, onNewSheet, onEndShift, da
         >
           {dark ? "☀" : "☽"}
         </button>
+        {onLogout && (
+          <button className="btn btn-ghost" onClick={onLogout} style={{ fontSize: 11 }}>
+            Sign Out
+          </button>
+        )}
       </div>
     </div>
   );

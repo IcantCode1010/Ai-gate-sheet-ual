@@ -16,7 +16,7 @@ function fmtMinutes(mins) {
   return `${mins} min`;
 }
 
-export default function ShiftSummaryModal({ sheet, onClose, onExportCSV }) {
+export default function ShiftSummaryModal({ sheet, onClose, onExportCSV, readOnly = false, canResume = false, onResume }) {
   const { entries, date, shiftType, coordinatorName } = sheet;
 
   const dispDeltas = entries.map(e => {
@@ -40,7 +40,7 @@ export default function ShiftSummaryModal({ sheet, onClose, onExportCSV }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-box" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>End-of-Shift Summary</h2>
+          <h2>{readOnly ? "Shift Record" : "End-of-Shift Summary"}</h2>
           <button className="modal-close" onClick={onClose}>✕</button>
         </div>
 
@@ -73,12 +73,21 @@ export default function ShiftSummaryModal({ sheet, onClose, onExportCSV }) {
         )}
 
         <div className="modal-actions">
-          <button className="btn btn-primary" onClick={onExportCSV}>
-            Export CSV
-          </button>
-          <button className="btn btn-secondary" onClick={() => window.print()}>
-            Print Sheet
-          </button>
+          {!readOnly && (
+            <button className="btn btn-primary" onClick={onExportCSV}>
+              Export CSV
+            </button>
+          )}
+          {!readOnly && (
+            <button className="btn btn-secondary" onClick={() => window.print()}>
+              Print Sheet
+            </button>
+          )}
+          {canResume && (
+            <button className="btn btn-primary" onClick={onResume}>
+              Resume This Shift
+            </button>
+          )}
           <button className="btn btn-ghost" onClick={onClose}>
             Close
           </button>
