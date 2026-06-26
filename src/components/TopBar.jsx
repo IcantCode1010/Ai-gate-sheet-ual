@@ -1,13 +1,14 @@
 import { useState } from "react";
 
 const SYNC_COLORS = { synced: "#2a7a2a", syncing: "#a07000", offline: "#cc2222" };
-const SYNC_LABELS = { synced: "Saved", syncing: "Saving…", offline: "Offline" };
+const SYNC_LABELS = { synced: "Saved", syncing: "Saving...", offline: "Offline" };
 
 export default function TopBar({
   onSave, onExportCSV, onNewSheet, onEndShift, dark, onToggleDark,
   displayName, onLogout, onInvite,
   showStatusBoard, onToggleStatusBoard,
   showHistory, onToggleHistory,
+  showDashboard, onToggleDashboard,
   syncStatus = "synced",
 }) {
   const [savedFlash, setSavedFlash] = useState(false);
@@ -32,13 +33,17 @@ export default function TopBar({
           style={{ background: SYNC_COLORS[syncStatus] }}
         />
 
-        <button className="btn btn-save" onClick={handleSave}>
-          {savedFlash ? "✓ Saved" : "Save"}
-        </button>
-        <button className="btn btn-secondary" onClick={onExportCSV}>CSV</button>
-        <button className="btn btn-secondary" onClick={() => window.print()}>Print / PDF</button>
-        <button className="btn btn-ghost" onClick={onNewSheet}>New Sheet</button>
-        <button className="btn btn-end-shift" onClick={onEndShift}>End Shift</button>
+        {!showDashboard && (
+          <>
+            <button className="btn btn-save" onClick={handleSave}>
+              {savedFlash ? "Saved" : "Save"}
+            </button>
+            <button className="btn btn-secondary" onClick={onExportCSV}>CSV</button>
+            <button className="btn btn-secondary" onClick={() => window.print()}>Print / PDF</button>
+            <button className="btn btn-ghost" onClick={onNewSheet}>New Sheet</button>
+            <button className="btn btn-end-shift" onClick={onEndShift}>End Shift</button>
+          </>
+        )}
 
         <div className="top-bar-divider" />
 
@@ -56,6 +61,13 @@ export default function TopBar({
         >
           History
         </button>
+        <button
+          className={`btn btn-ghost${showDashboard ? " btn-active" : ""}`}
+          onClick={onToggleDashboard}
+          title="User dashboard"
+        >
+          Dashboard
+        </button>
         <button className="btn btn-ghost" onClick={onInvite} title="Invite team member">
           + Invite
         </button>
@@ -70,7 +82,7 @@ export default function TopBar({
           onClick={onToggleDark}
           title={dark ? "Switch to light mode" : "Switch to dark mode"}
         >
-          {dark ? "☀" : "☽"}
+          {dark ? "Light" : "Dark"}
         </button>
         {onLogout && (
           <button className="btn btn-ghost" onClick={onLogout} style={{ fontSize: 11 }}>

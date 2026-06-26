@@ -8,6 +8,7 @@ import ShiftSummaryModal from "./components/ShiftSummaryModal";
 import StatusBoard from "./components/StatusBoard";
 import ShiftHistoryPanel from "./components/ShiftHistoryPanel";
 import InviteModal from "./components/InviteModal";
+import UserDashboard from "./components/UserDashboard";
 import { useShiftSync } from "./hooks/useShiftSync";
 import { useDarkMode } from "./hooks/useDarkMode";
 import { usePresence } from "./hooks/usePresence";
@@ -43,6 +44,7 @@ export default function App({ session, profile, onLogout }) {
   const [showSummary, setShowSummary] = useState(false);
   const [showStatusBoard, setShowStatusBoard] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
 
   // Build presence payload for status board
@@ -85,58 +87,80 @@ export default function App({ session, profile, onLogout }) {
         onLogout={onLogout}
         onInvite={() => setShowInvite(true)}
         showStatusBoard={showStatusBoard}
-        onToggleStatusBoard={() => setShowStatusBoard(s => !s)}
+        onToggleStatusBoard={() => {
+          setShowDashboard(false);
+          setShowStatusBoard(s => !s);
+        }}
         showHistory={showHistory}
-        onToggleHistory={() => setShowHistory(s => !s)}
+        onToggleHistory={() => {
+          setShowDashboard(false);
+          setShowHistory(s => !s);
+        }}
+        showDashboard={showDashboard}
+        onToggleDashboard={() => {
+          setShowStatusBoard(false);
+          setShowHistory(false);
+          setShowDashboard(s => !s);
+        }}
         syncStatus={syncStatus}
       />
 
-      <div className="app-body">
-        <div className="scroll-area">
-          <ShiftHeader
-            date={sheet.date}
+      {showDashboard ? (
+        <UserDashboard
+          currentUserId={userId}
+          onlineUsers={onlineUsers}
+          onClose={() => setShowDashboard(false)}
+        />
+      ) : (
+        <>
+          <div className="app-body">
+            <div className="scroll-area">
+              <ShiftHeader
+                date={sheet.date}
+                shiftType={sheet.shiftType}
+                coordinatorName={sheet.coordinatorName}
+                notes={sheet.notes}
+                onChange={updateSheetField}
+              />
+              <GateSheet
+                entries={sheet.entries}
+                activeIndex={activeIndex}
+                onActivate={setActiveIndex}
+                onEntryChange={updateEntry}
+                onRemove={removeEntry}
+                onAddEntry={handleAddEntry}
+              />
+              <ReferenceStrip />
+            </div>
+
+            {showStatusBoard && (
+              <StatusBoard
+                users={onlineUsers}
+                currentUserId={userId}
+                onClose={() => setShowStatusBoard(false)}
+              />
+            )}
+
+            {showHistory && (
+              <ShiftHistoryPanel
+                currentUserId={userId}
+                onLoadShift={loadShift}
+                onClose={() => setShowHistory(false)}
+              />
+            )}
+          </div>
+
+          <ChatPanel
+            activeIndex={activeIndex}
+            currentEntry={sheet.entries[activeIndex]}
             shiftType={sheet.shiftType}
             coordinatorName={sheet.coordinatorName}
-            notes={sheet.notes}
-            onChange={updateSheetField}
+            totalEntries={sheet.entries.length}
+            onFieldsFilled={applyAiFields}
+            onAddAndFill={(fields) => addAndApplyFields(fields, sheet.entries.length)}
           />
-          <GateSheet
-            entries={sheet.entries}
-            activeIndex={activeIndex}
-            onActivate={setActiveIndex}
-            onEntryChange={updateEntry}
-            onRemove={removeEntry}
-            onAddEntry={handleAddEntry}
-          />
-          <ReferenceStrip />
-        </div>
-
-        {showStatusBoard && (
-          <StatusBoard
-            users={onlineUsers}
-            currentUserId={userId}
-            onClose={() => setShowStatusBoard(false)}
-          />
-        )}
-
-        {showHistory && (
-          <ShiftHistoryPanel
-            currentUserId={userId}
-            onLoadShift={loadShift}
-            onClose={() => setShowHistory(false)}
-          />
-        )}
-      </div>
-
-      <ChatPanel
-        activeIndex={activeIndex}
-        currentEntry={sheet.entries[activeIndex]}
-        shiftType={sheet.shiftType}
-        coordinatorName={sheet.coordinatorName}
-        totalEntries={sheet.entries.length}
-        onFieldsFilled={applyAiFields}
-        onAddAndFill={(fields) => addAndApplyFields(fields, sheet.entries.length)}
-      />
+        </>
+      )}
 
       {showSummary && (
         <ShiftSummaryModal
