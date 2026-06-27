@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import ReadOnlySheetView from "./ReadOnlySheetView";
 import { useDashboardData } from "../hooks/useDashboardData";
+import { getDashboardSheetOpenMode } from "../utils/dashboardSheetOpen";
 
 function formatDateTime(value) {
   if (!value) return "No updates";
@@ -16,7 +17,7 @@ function entryCount(shift) {
   return Array.isArray(shift?.entries) ? shift.entries.length : 0;
 }
 
-export default function UserDashboard({ currentUserId, onlineUsers, onClose }) {
+export default function UserDashboard({ currentUserId, onlineUsers, onLoadOwnShift, onClose }) {
   const { users, loading, error, reload } = useDashboardData();
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedShift, setSelectedShift] = useState(null);
@@ -42,6 +43,13 @@ export default function UserDashboard({ currentUserId, onlineUsers, onClose }) {
   });
   const totalOnline = users.filter(user => onlineById.has(user.id)).length;
   const usersWithSheets = users.filter(user => user.latestShift).length;
+  const openShift = (shift) => {
+    if (getDashboardSheetOpenMode(shift, currentUserId) === "editable-own-sheet" && onLoadOwnShift) {
+      onLoadOwnShift(shift.id);
+      return;
+    }
+    setSelectedShift(shift);
+  };
 
   if (selectedShift) {
     return (
@@ -175,8 +183,8 @@ export default function UserDashboard({ currentUserId, onlineUsers, onClose }) {
                     <h3>{latestShift ? latestShift.date : "No sheet saved"}</h3>
                   </div>
                   {latestShift && (
-                    <button className="btn btn-primary" onClick={() => setSelectedShift(latestShift)}>
-                      View Sheet
+                    <button className="btn btn-primary" onClick={() => openShift(latestShift)}>
+                      {getDashboardSheetOpenMode(latestShift, currentUserId) === "editable-own-sheet" ? "Open Sheet" : "View Sheet"}
                     </button>
                   )}
                 </div>
@@ -227,7 +235,7 @@ export default function UserDashboard({ currentUserId, onlineUsers, onClose }) {
                     <button
                       key={shift.id}
                       className="dashboard-shift-row"
-                      onClick={() => setSelectedShift(shift)}
+                      onClick={() => openShift(shift)}
                     >
                       <span>
                         <strong>{shift.date}</strong>

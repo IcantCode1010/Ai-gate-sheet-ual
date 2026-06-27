@@ -114,6 +114,10 @@ export default function App({ session, profile, onLogout }) {
         <UserDashboard
           currentUserId={userId}
           onlineUsers={onlineUsers}
+          onLoadOwnShift={async (shiftId) => {
+            await loadShift(shiftId);
+            setShowDashboard(false);
+          }}
           onClose={() => setShowDashboard(false)}
         />
       ) : (
