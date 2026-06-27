@@ -20,6 +20,7 @@ export default function UserDashboard({ currentUserId, onlineUsers, onClose }) {
   const { users, loading, error, reload } = useDashboardData();
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedShift, setSelectedShift] = useState(null);
+  const [search, setSearch] = useState("");
 
   const onlineById = useMemo(() => {
     return new Map((onlineUsers || []).map(user => [user.userId, user]));
@@ -35,13 +36,20 @@ export default function UserDashboard({ currentUserId, onlineUsers, onClose }) {
   const latestShift = selectedUser?.latestShift || null;
   const recentShifts = selectedUser?.shifts || [];
   const onlineUser = selectedUser ? onlineById.get(selectedUser.id) : null;
+  const filteredUsers = users.filter(user => {
+    const name = user.display_name || "";
+    return name.toLowerCase().includes(search.trim().toLowerCase());
+  });
+  const totalOnline = users.filter(user => onlineById.has(user.id)).length;
+  const usersWithSheets = users.filter(user => user.latestShift).length;
 
   return (
     <div className="dashboard-page no-print">
       <div className="dashboard-header">
         <div>
+          <div className="dashboard-kicker">Operations Console</div>
           <h1>User Dashboard</h1>
-          <p>View team members and inspect saved gate sheets.</p>
+          <p>Monitor team activity and inspect saved gate sheets.</p>
         </div>
         <div className="dashboard-header-actions">
           <button className="btn btn-secondary" onClick={reload} disabled={loading}>
@@ -57,9 +65,23 @@ export default function UserDashboard({ currentUserId, onlineUsers, onClose }) {
 
       <div className="dashboard-layout">
         <aside className="dashboard-users">
-          <div className="dashboard-section-title">
-            <span>Users</span>
-            <span>{users.length}</span>
+          <div className="dashboard-rail-header">
+            <div>
+              <div className="dashboard-section-title">Team</div>
+              <div className="dashboard-rail-subtitle">
+                {totalOnline} online / {users.length} total
+              </div>
+            </div>
+            <span className="dashboard-count-pill">{usersWithSheets} active</span>
+          </div>
+
+          <div className="dashboard-search-wrap">
+            <input
+              className="dashboard-search"
+              value={search}
+              onChange={event => setSearch(event.target.value)}
+              placeholder="Search users"
+            />
           </div>
 
           {loading && <div className="status-empty">Loading users...</div>}
@@ -67,7 +89,12 @@ export default function UserDashboard({ currentUserId, onlineUsers, onClose }) {
             <div className="status-empty">No users found.</div>
           )}
 
-          {users.map(user => {
+          {!loading && users.length > 0 && filteredUsers.length === 0 && (
+            <div className="status-empty">No matching users.</div>
+          )}
+
+          <div className="dashboard-user-list">
+          {filteredUsers.map(user => {
             const isOnline = onlineById.has(user.id);
             const isSelected = selectedUser?.id === user.id;
             const latest = user.latestShift;
@@ -92,6 +119,7 @@ export default function UserDashboard({ currentUserId, onlineUsers, onClose }) {
               </button>
             );
           })}
+          </div>
         </aside>
 
         <main className="dashboard-detail">
@@ -104,12 +132,13 @@ export default function UserDashboard({ currentUserId, onlineUsers, onClose }) {
           {selectedUser && (
             <>
               <section className="dashboard-user-summary">
-                <div>
+                <div className="dashboard-selected-user">
                   <div className="dashboard-kicker">Selected User</div>
                   <h2>{selectedUser.display_name || "Unnamed user"}</h2>
-                  <div className="dashboard-status-line">
+                  <div className="dashboard-status-row">
                     <span className={`dashboard-presence-dot${onlineUser ? " dashboard-presence-online" : ""}`} />
-                    {onlineUser ? "Online now" : "Offline"}
+                    <span>{onlineUser ? "Online now" : "Offline"}</span>
+                    {latestShift && <span>Last update {formatDateTime(latestShift.updated_at)}</span>}
                   </div>
                 </div>
 
@@ -129,10 +158,17 @@ export default function UserDashboard({ currentUserId, onlineUsers, onClose }) {
                 </div>
               </section>
 
-              <section className="dashboard-latest">
-                <div className="dashboard-section-title">
-                  <span>Latest Sheet</span>
-                  {latestShift && <span>{formatDateTime(latestShift.updated_at)}</span>}
+              <section className="dashboard-latest dashboard-console-panel">
+                <div className="dashboard-panel-header">
+                  <div>
+                    <div className="dashboard-kicker">Latest Sheet</div>
+                    <h3>{latestShift ? latestShift.date : "No sheet saved"}</h3>
+                  </div>
+                  {latestShift && (
+                    <button className="btn btn-primary" onClick={() => setSelectedShift(latestShift)}>
+                      View Sheet
+                    </button>
+                  )}
                 </div>
 
                 {!latestShift && (
@@ -144,7 +180,6 @@ export default function UserDashboard({ currentUserId, onlineUsers, onClose }) {
                 {latestShift && (
                   <div className="dashboard-latest-card">
                     <div className="dashboard-sheet-title">
-                      <span>{latestShift.date}</span>
                       {latestShift.shift_type && (
                         <span className="modal-badge">{latestShift.shift_type} Shift</span>
                       )}
@@ -156,20 +191,28 @@ export default function UserDashboard({ currentUserId, onlineUsers, onClose }) {
                     {latestShift.notes && (
                       <p className="dashboard-sheet-notes">{latestShift.notes}</p>
                     )}
-                    <button className="btn btn-primary" onClick={() => setSelectedShift(latestShift)}>
-                      View Sheet
-                    </button>
                   </div>
                 )}
               </section>
 
-              <section className="dashboard-history">
-                <div className="dashboard-section-title">
-                  <span>Recent Sheets</span>
-                  <span>{recentShifts.length}</span>
+              <section className="dashboard-history dashboard-console-panel">
+                <div className="dashboard-panel-header">
+                  <div>
+                    <div className="dashboard-kicker">Recent Sheets</div>
+                    <h3>{recentShifts.length} saved record{recentShifts.length === 1 ? "" : "s"}</h3>
+                  </div>
                 </div>
 
                 <div className="dashboard-shift-list">
+                  {recentShifts.length > 0 && (
+                    <div className="dashboard-shift-head">
+                      <span>Date</span>
+                      <span>Shift</span>
+                      <span>Coordinator</span>
+                      <span>Calls</span>
+                      <span>Last Updated</span>
+                    </div>
+                  )}
                   {recentShifts.map(shift => (
                     <button
                       key={shift.id}
@@ -178,8 +221,8 @@ export default function UserDashboard({ currentUserId, onlineUsers, onClose }) {
                     >
                       <span>
                         <strong>{shift.date}</strong>
-                        {shift.shift_type && <span className="modal-badge">{shift.shift_type}</span>}
                       </span>
+                      <span>{shift.shift_type || "-"}</span>
                       <span>{shift.coordinator_name || "No coordinator"}</span>
                       <span>{entryCount(shift)} calls</span>
                       <span>{formatDateTime(shift.updated_at)}</span>

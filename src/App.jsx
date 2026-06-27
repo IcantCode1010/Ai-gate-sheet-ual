@@ -86,6 +86,11 @@ export default function App({ session, profile, onLogout }) {
         displayName={profile?.display_name}
         onLogout={onLogout}
         onInvite={() => setShowInvite(true)}
+        onShowSheet={() => {
+          setShowDashboard(false);
+          setShowStatusBoard(false);
+          setShowHistory(false);
+        }}
         showStatusBoard={showStatusBoard}
         onToggleStatusBoard={() => {
           setShowDashboard(false);
