@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { sendChatMessage, parseFieldsBlock, cleanAiText, buildSystemPrompt } from "../api/chat";
+import { resolveChatFieldAction } from "../api/chatFlow";
 import { useVoice } from "../hooks/useVoice";
 
 const MIN_HEIGHT = 160;
@@ -47,13 +48,12 @@ export default function ChatPanel({ activeIndex, currentEntry, shiftType, coordi
 
       let newRowNote = "";
       if (fields) {
-        const incomingAc = fields.ac?.trim();
-        const existingAc = currentEntry.ac?.trim();
-        if (incomingAc && existingAc && incomingAc !== existingAc) {
-          const newIndex = onAddAndFill(fields);
-          newRowNote = ` ↳ A/C mismatch — added as new Row ${newIndex + 1}.`;
+        const action = resolveChatFieldAction(currentEntry, fields);
+        if (action.type === "addNewRow") {
+          const newIndex = onAddAndFill(action.fields);
+          newRowNote = ` -> A/C mismatch - added as new Row ${newIndex + 1}.`;
         } else {
-          onFieldsFilled(activeIndex, fields);
+          onFieldsFilled(activeIndex, action.fields);
         }
       }
 
@@ -62,11 +62,11 @@ export default function ChatPanel({ activeIndex, currentEntry, shiftType, coordi
         { role: "assistant", content: clean + newRowNote, filledKeys, newRow: !!newRowNote },
       ]);
     } catch (e) {
-      setError(e.message || "AI unavailable — check API connection.");
+      setError(e.message || "AI unavailable - check API connection.");
     } finally {
       setLoading(false);
     }
-  }, [input, loading, messages, activeIndex, currentEntry, shiftType, coordinatorName, totalEntries, onFieldsFilled]);
+  }, [input, loading, messages, activeIndex, currentEntry, shiftType, coordinatorName, totalEntries, onFieldsFilled, onAddAndFill]);
 
   const { listening, supported, toggle } = useVoice(
     useCallback((transcript, err) => {
@@ -82,7 +82,6 @@ export default function ChatPanel({ activeIndex, currentEntry, shiftType, coordi
     }
   }
 
-  // Drag-to-resize logic
   function onDragStart(e) {
     const startY = e.clientY;
     const startH = panelHeight;
@@ -102,19 +101,19 @@ export default function ChatPanel({ activeIndex, currentEntry, shiftType, coordi
   return (
     <div className="chat-panel no-print" style={{ height: panelHeight }}>
       <div className="drag-handle" onMouseDown={onDragStart} ref={dragRef}>
-        <span className="drag-dots">···</span>
+        <span className="drag-dots">...</span>
       </div>
 
       <div className="chat-header">
         <span className="chat-title">AI Gate Agent</span>
         <span className="chat-row-indicator">Row {activeIndex + 1}</span>
-        {listening && <span className="rec-indicator">● REC</span>}
+        {listening && <span className="rec-indicator">REC</span>}
       </div>
 
       <div className="message-thread" ref={threadRef}>
         {messages.length === 0 && (
           <div className="chat-empty">
-            Describe a gate call or say a field value — AI will fill the active row.
+            Describe a gate call or say a field value - AI will fill the active row.
           </div>
         )}
         {messages.map((m, i) => (
@@ -131,7 +130,7 @@ export default function ChatPanel({ activeIndex, currentEntry, shiftType, coordi
         ))}
         {loading && (
           <div className="message message-assistant">
-            <span className="typing-dots">···</span>
+            <span className="typing-dots">...</span>
           </div>
         )}
         {error && <div className="chat-error">{error}</div>}
@@ -144,7 +143,7 @@ export default function ChatPanel({ activeIndex, currentEntry, shiftType, coordi
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={onKeyDown}
-          placeholder="Describe gate call or say field values…"
+          placeholder="Describe gate call or say field values..."
           rows={2}
           disabled={loading}
         />
@@ -154,7 +153,7 @@ export default function ChatPanel({ activeIndex, currentEntry, shiftType, coordi
             onClick={() => toggle(() => input, setInput)}
             title={listening ? "Stop recording" : "Start voice dictation"}
           >
-            🎤
+            Mic
           </button>
         )}
         <button
@@ -162,7 +161,7 @@ export default function ChatPanel({ activeIndex, currentEntry, shiftType, coordi
           onClick={() => handleSend()}
           disabled={loading || !input.trim()}
         >
-          ↑
+          Send
         </button>
       </div>
     </div>

@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || "/.netlify/functions/chat";
+const API_URL = import.meta.env?.VITE_API_URL || "/.netlify/functions/chat";
 
 export async function sendChatMessage(messages, systemPrompt) {
   const response = await fetch(API_URL, {

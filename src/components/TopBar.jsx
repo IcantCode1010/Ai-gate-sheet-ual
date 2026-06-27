@@ -24,6 +24,13 @@ export default function TopBar({
       <div className="top-bar-title">
         <span className="app-title">HMC Gate Sheet</span>
         <span className="app-subtitle">AI Gate Call Logger</span>
+        <button
+          className={`btn btn-title-dashboard${showDashboard ? " btn-active" : ""}`}
+          onClick={onToggleDashboard}
+          title="User dashboard"
+        >
+          Dashboard
+        </button>
       </div>
 
       <div className="top-bar-actions">
@@ -36,7 +43,7 @@ export default function TopBar({
             Sheet
           </button>
           <button
-            className={`btn btn-nav${showDashboard ? " btn-active" : ""}`}
+            className={`btn btn-nav nav-dashboard${showDashboard ? " btn-active" : ""}`}
             onClick={onToggleDashboard}
             title="User dashboard"
           >

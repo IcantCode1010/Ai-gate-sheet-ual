@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import ShiftSummaryModal from "./ShiftSummaryModal";
+import ReadOnlySheetView from "./ReadOnlySheetView";
 import { useDashboardData } from "../hooks/useDashboardData";
 
 function formatDateTime(value) {
@@ -42,6 +42,16 @@ export default function UserDashboard({ currentUserId, onlineUsers, onClose }) {
   });
   const totalOnline = users.filter(user => onlineById.has(user.id)).length;
   const usersWithSheets = users.filter(user => user.latestShift).length;
+
+  if (selectedShift) {
+    return (
+      <ReadOnlySheetView
+        shift={selectedShift}
+        ownerName={selectedUser?.display_name || "Unknown user"}
+        onBack={() => setSelectedShift(null)}
+      />
+    );
+  }
 
   return (
     <div className="dashboard-page no-print">
@@ -239,20 +249,6 @@ export default function UserDashboard({ currentUserId, onlineUsers, onClose }) {
           )}
         </main>
       </div>
-
-      {selectedShift && (
-        <ShiftSummaryModal
-          sheet={{
-            date: selectedShift.date,
-            shiftType: selectedShift.shift_type,
-            coordinatorName: selectedShift.coordinator_name,
-            entries: selectedShift.entries || [],
-          }}
-          readOnly
-          onClose={() => setSelectedShift(null)}
-          onExportCSV={() => {}}
-        />
-      )}
     </div>
   );
 }

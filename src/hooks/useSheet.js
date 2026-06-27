@@ -29,6 +29,41 @@ function loadFromStorage() {
   return null;
 }
 
+function normalizeText(value) {
+  return String(value || "").trim().replace(/\s+/g, " ");
+}
+
+function includesExistingProblem(existingProblem, incomingProblem) {
+  const existing = normalizeText(existingProblem).toLowerCase();
+  const incoming = normalizeText(incomingProblem).toLowerCase();
+  return existing && incoming.includes(existing);
+}
+
+export function mergeAiFields(existingEntry, fields) {
+  const updated = { ...existingEntry };
+
+  Object.keys(fields).forEach(key => {
+    const value = fields[key];
+    if (value === "") return;
+
+    if (key === "problem") {
+      const existingProblem = normalizeText(existingEntry.problem);
+      const incomingProblem = normalizeText(value);
+      if (!incomingProblem) return;
+      if (!existingProblem || includesExistingProblem(existingProblem, incomingProblem)) {
+        updated.problem = value;
+      } else if (existingProblem.toLowerCase() !== incomingProblem.toLowerCase()) {
+        updated.problem = `${existingEntry.problem} / ${value}`;
+      }
+      return;
+    }
+
+    updated[key] = value;
+  });
+
+  return updated;
+}
+
 export function useSheet() {
   const [sheet, setSheet] = useState(() => {
     const saved = loadFromStorage();
@@ -92,11 +127,7 @@ export function useSheet() {
     setSheet(s => {
       const entries = s.entries.map((e, i) => {
         if (i !== index) return e;
-        const updated = { ...e };
-        Object.keys(fields).forEach(key => {
-          if (fields[key] !== "") updated[key] = fields[key];
-        });
-        return updated;
+        return mergeAiFields(e, fields);
       });
       return { ...s, entries };
     });
